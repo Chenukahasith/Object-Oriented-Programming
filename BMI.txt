@@ -1,0 +1,191 @@
+bmi
+import javax.swing.*;
+import java.awt.*;
+
+public class BMICalculatorSwing extends JFrame {
+
+    private JPanel mainPanel;
+    private CardLayout cardLayout;
+
+    // Components to store/display data
+    private JTextField cmField, inchField, kgField, lbField;
+    private JLabel bmiValueLabel, bmiStatusLabel, summaryLabel;
+
+    public BMICalculatorSwing() {
+        setTitle("BMI Calculator");
+        setSize(350, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        // Build the three screens
+        mainPanel.add(createWelcomePanel(), "Welcome");
+        mainPanel.add(createInputPanel(), "Input");
+        mainPanel.add(createResultPanel(), "Result");
+
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    // --- SCREEN 1: WELCOME ---
+    private JPanel createWelcomePanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.lightGray);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0; gbc.insets = new Insets(10, 10, 10, 10);
+
+        JLabel title = new JLabel("<html><center>BMI<br/>Calculator</center></html>");
+        title.setFont(new Font("Arial", Font.BOLD, 40));
+        title.setForeground(Color.BLUE);
+        gbc.gridy = 0; panel.add(title, gbc);
+
+        JLabel desc = new JLabel("<html><center>BMI calculator design<br/>your body weight is<br/>healthy or not.</center></html>");
+        gbc.gridy = 1; panel.add(desc, gbc);
+
+        JButton startBtn = new JButton("Start");
+        startBtn.setPreferredSize(new Dimension(100, 40));
+        startBtn.addActionListener(e -> cardLayout.show(mainPanel, "Input"));
+        gbc.gridy = 2; panel.add(startBtn, gbc);
+
+        return panel;
+    }
+
+    // --- SCREEN 2: INPUT ---
+    private JPanel createInputPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel header = new JLabel("BMI Calculator");
+        header.setFont(new Font("Arial", Font.BOLD, 20));
+        header.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // ----- METRIC SECTION -----
+        JPanel metricPanel = new JPanel(new GridLayout(2,2,5,5));
+        metricPanel.setBorder(BorderFactory.createTitledBorder("Metric System"));
+
+        cmField = new JTextField();
+        kgField = new JTextField();
+
+        metricPanel.add(new JLabel("Height (cm):"));
+        metricPanel.add(cmField);
+        metricPanel.add(new JLabel("Weight (kg):"));
+        metricPanel.add(kgField);
+
+        // ----- OR LABEL -----
+        JLabel orLabel = new JLabel("OR");
+        orLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // ----- IMPERIAL SECTION -----
+        JPanel imperialPanel = new JPanel(new GridLayout(2,2,5,5));
+        imperialPanel.setBorder(BorderFactory.createTitledBorder("Imperial System"));
+
+        inchField = new JTextField();
+        lbField = new JTextField();
+
+        imperialPanel.add(new JLabel("Height (inch):"));
+        imperialPanel.add(inchField);
+        imperialPanel.add(new JLabel("Weight (lb):"));
+        imperialPanel.add(lbField);
+
+        // ----- CALCULATE BUTTON -----
+        JButton calcBtn = new JButton("Calculate BMI");
+        calcBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        calcBtn.addActionListener(e -> performCalculation());
+
+        panel.add(header);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(metricPanel);
+        panel.add(Box.createVerticalStrut(15));
+        panel.add(orLabel);
+        panel.add(Box.createVerticalStrut(15));
+        panel.add(imperialPanel);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(calcBtn);
+
+        return panel;
+    }
+    // --- SCREEN 3: RESULT ---
+    private JPanel createResultPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0; gbc.insets = new Insets(10, 10, 10, 10);
+
+        JLabel resTitle = new JLabel("Result");
+        resTitle.setFont(new Font("Arial", Font.BOLD, 24));
+        gbc.gridy = 0; panel.add(resTitle, gbc);
+
+        // Circle representation using a custom Label border
+        bmiValueLabel = new JLabel("0.0", SwingConstants.CENTER);
+        bmiValueLabel.setFont(new Font("Arial", Font.BOLD, 30));
+        bmiValueLabel.setPreferredSize(new Dimension(150, 150));
+        bmiValueLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3, true));
+        gbc.gridy = 1; panel.add(bmiValueLabel, gbc);
+
+        bmiStatusLabel = new JLabel("Status");
+        gbc.gridy = 2; panel.add(bmiStatusLabel, gbc);
+
+        summaryLabel = new JLabel("Height: -- | Weight: --");
+        gbc.gridy = 3; panel.add(summaryLabel, gbc);
+
+        JLabel quote = new JLabel("<html><center><i>\"Believe in progress not perfection.<br/>Healthy is more valuable\"</i></center></html>");
+        gbc.gridy = 4; panel.add(quote, gbc);
+
+        JButton retryBtn = new JButton("Retry");
+        retryBtn.addActionListener(e -> cardLayout.show(mainPanel, "Input"));
+        gbc.gridy = 5; panel.add(retryBtn, gbc);
+
+        return panel;
+    }
+
+    private void performCalculation() {
+        try {
+
+            double heightM;
+            double weightKg;
+
+            // Metric system (cm + kg)
+            if (!cmField.getText().isEmpty() && !kgField.getText().isEmpty()) {
+                heightM = Double.parseDouble(cmField.getText()) / 100.0;
+                weightKg = Double.parseDouble(kgField.getText());
+            }
+
+            // Imperial system (inch + lb)
+            else if (!inchField.getText().isEmpty() && !lbField.getText().isEmpty()) {
+                heightM = Double.parseDouble(inchField.getText()) * 0.0254;
+                weightKg = Double.parseDouble(lbField.getText()) * 0.453592;
+            }
+
+            else {
+                throw new Exception();
+            }
+
+            double bmi = weightKg / (heightM * heightM);
+
+            String status;
+            if (bmi < 18.5)
+                status = "Underweight";
+            else if (bmi < 25)
+                status = "Healthy";
+            else if (bmi < 30)
+                status = "Overweight";
+            else
+                status = "Obese";
+
+            bmiValueLabel.setText(String.format("%.1f", bmi));
+            bmiStatusLabel.setText(status);
+            summaryLabel.setText(String.format("H: %.2fm | W: %.1fkg", heightM, weightKg));
+
+            cardLayout.show(mainPanel, "Result");
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Enter either:\nHeight(cm) + Weight(kg)\nOR\nHeight(inch) + Weight(lb)");
+        }
+    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(BMICalculatorSwing::new);
+    }
+}
